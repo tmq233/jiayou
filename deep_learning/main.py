@@ -6,6 +6,7 @@ Run specific demo:
     python deep_learning/main.py 3    # LayerNorm vs BatchNorm
     python deep_learning/main.py 4    # residual connections
     python deep_learning/main.py 5    # dropout & regularization
+    python deep_learning/main.py 6    # overfitting demonstration
 
 Run all:
     python deep_learning/main.py
@@ -22,6 +23,7 @@ DEMOS = {
     '3': ('demo_03_norm', 'LayerNorm vs BatchNorm'),
     '4': ('demo_04_residual', 'Residual Connections'),
     '5': ('demo_05_dropout', 'Dropout & Regularization'),
+    '6': ('demo_06_overfit', 'Overfitting — Memorize vs Learn'),
 }
 
 

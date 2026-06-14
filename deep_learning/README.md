@@ -29,12 +29,13 @@ deep_learning/
 │   ├── 容器: Sequential
 │   ├── 损失: MSELoss, CrossEntropyLoss
 │   └── 优化器: SGD (momentum + weight_decay)
-├── demos/                               # 5 个可运行实验
+├── demos/                               # 6 个可运行实验
 │   ├── demo_01_backprop.py
 │   ├── demo_02_init.py
 │   ├── demo_03_norm.py
 │   ├── demo_04_residual.py
-│   └── demo_05_dropout.py
+│   ├── demo_05_dropout.py
+│   └── demo_06_overfit.py
 ├── main.py                              # 统一入口
 └── README.md
 ```
@@ -51,6 +52,7 @@ python deep_learning/main.py 2    # 权重初始化
 python deep_learning/main.py 3    # LayerNorm vs BatchNorm
 python deep_learning/main.py 4    # 残差连接
 python deep_learning/main.py 5    # Dropout
+python deep_learning/main.py 6    # 过拟合演示
 ```
 
 ## Demo 说明
@@ -86,6 +88,13 @@ python deep_learning/main.py 5    # Dropout
 - **训练**：$p=0.5$ 的 Dropout 有效抑制过拟合
 - **推理**：`model.eval()` 关闭 Dropout，输出确定性
 - **陷阱演示**：Monte Carlo 采样展示 train mode 下的输出噪声（$\sigma > 0$），eval mode 下 $\sigma = 0$
+
+### Demo 6: 过拟合 — 模型在"背答案"而非"学规律"
+- **场景**：仅 15 个训练点 + 2000+ 参数 + 6000 epoch
+- **现象**：train loss 持续下降，val loss 先降后升（divergence）
+- **可视化**：函数曲线从平滑 → 剧烈抖动（逐点记忆噪声）
+- **对比**：early stopping 时刻的曲线 vs 过度训练后的曲线
+- **总结面板**：过拟合原因 + 6 种修复方法
 
 ## 依赖
 
