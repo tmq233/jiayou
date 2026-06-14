@@ -41,7 +41,7 @@ def run():
     idx_val = np.setdiff1d(np.arange(500), idx_train)
 
     X_train = x_all[idx_train]
-    y_train = (y_true[idx_train] + 0.15 * np.random.randn(15)).reshape(-1, 1)
+    y_train = (y_true[idx_train] + 0.4 * np.random.randn(15)).reshape(-1, 1)
     X_val = x_all[idx_val]
     y_val = (y_true[idx_val] + 0.15 * np.random.randn(485)).reshape(-1, 1)
 
@@ -57,6 +57,9 @@ def run():
 
     train_losses, val_losses = [], []
     snapshots = {}
+    best_val_loss = float('inf')
+    best_val_epoch = 0
+    y_best_snapshot = None
 
     for epoch in range(6000):
         model.train()
@@ -71,15 +74,17 @@ def run():
         val_loss = loss_fn.forward(y_val_pred, y_val)
         val_losses.append(val_loss)
 
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_val_epoch = epoch
+            y_best_snapshot = model.forward(x_all).flatten()
+
         if epoch in [0, 100, 500, 1500, 4000, 5999]:
             snapshots[epoch] = model.forward(x_all).flatten()
 
         if epoch % 1000 == 0:
             print(f"  epoch {epoch:4d}:  train_loss={loss:.6f},  "
                   f"val_loss={val_loss:.6f}")
-
-    best_val_epoch = int(np.argmin(val_losses))
-    y_best = model.forward(x_all).flatten()
 
     # ── Interpretation ──
     train_best = train_losses[best_val_epoch]
@@ -176,11 +181,12 @@ def run():
     axes[0, 2].set_ylabel("Frobenius Norm")
     axes[0, 2].set_title("Final Weight Norms (large = memorized)")
 
-    snapshot_epochs = [0, 100, 500, 1500, 4000, 5999]
-    colors_snap = ['gray', 'blue', 'cyan', 'green', 'orange', 'red']
+    snapshots[best_val_epoch] = y_best_snapshot
+    snapshot_epochs = sorted(set([0, 100, 500, 1500, 4000, 5999, best_val_epoch]))
+    colors_snap = ['gray', 'blue', 'cyan', 'green', 'orange', 'red', 'gold']
     for i, ep in enumerate(snapshot_epochs):
         axes[1, 0].plot(x_all.flatten(), snapshots[ep],
-                        color=colors_snap[i], linewidth=1.0 + i * 0.3,
+                        color=colors_snap[i % len(colors_snap)], linewidth=1.0 + i * 0.3,
                         alpha=0.8, label=f'epoch {ep}')
     axes[1, 0].scatter(X_train.flatten(), y_train.flatten(), s=30,
                        c='black', zorder=5, label='train data (15 pts)')
@@ -192,7 +198,7 @@ def run():
 
     axes[1, 1].scatter(X_train.flatten(), y_train.flatten(), s=30,
                        c='black', zorder=5, label='train data')
-    axes[1, 1].plot(x_all.flatten(), y_best,
+    axes[1, 1].plot(x_all.flatten(), y_best_snapshot,
                     'g-', linewidth=2.0, label=f'best (epoch {best_val_epoch})')
     axes[1, 1].plot(x_all.flatten(), snapshots[5999],
                     'r-', linewidth=1.5, alpha=0.7, label='final (epoch 5999)')
